@@ -651,8 +651,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             return null;
         }
 
-        // TODO encrypt drafts for storage
-        if (!isDraft && cryptoStatus.shouldUsePgpMessageBuilder()) {
+        if (cryptoStatus.shouldUsePgpMessageBuilder()) {
             SendErrorState maybeSendErrorState = cryptoStatus.getSendErrorStateOrNull();
             if (maybeSendErrorState != null) {
                 recipientPresenter.showPgpSendError(maybeSendErrorState);
@@ -1516,9 +1515,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 message.setUid(relatedMessageReference.getUid());
             }
 
-            boolean saveRemotely = recipientPresenter.shouldSaveRemotely();
             new SaveMessageTask(getApplicationContext(), account, contacts, internalMessageHandler,
-                    message, draftId, saveRemotely).execute();
+                    message, draftId, true).execute();
             if (finishAfterDraftSaved) {
                 finish();
             } else {
