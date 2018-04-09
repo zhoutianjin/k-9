@@ -20,6 +20,7 @@ data class ComposeCryptoStatus(private val openPgpProviderState: OpenPgpProvider
                                val isPgpInlineModeEnabled: Boolean,
                                val isSenderPreferEncryptMutual: Boolean,
                                val isReplyToEncrypted: Boolean,
+                               val isEncryptAllDrafts: Boolean,
                                val isEncryptSubject: Boolean,
                                private val cryptoMode: CryptoMode,
                                private val recipientAutocryptStatus: RecipientAutocryptStatus? = null) {
@@ -30,11 +31,12 @@ data class ComposeCryptoStatus(private val openPgpProviderState: OpenPgpProvider
                 isPgpInlineModeEnabled: Boolean,
                 isSenderPreferEncryptMutual: Boolean,
                 isReplyToEncrypted: Boolean,
+                isEncryptAllDrafts: Boolean,
                 isEncryptSubject: Boolean,
                 cryptoMode: CryptoMode) : this(
             openPgpProviderState, openPgpKeyId,
             recipientAddresses.map { it.address.address },
-            isPgpInlineModeEnabled, isSenderPreferEncryptMutual, isReplyToEncrypted, isEncryptSubject, cryptoMode)
+            isPgpInlineModeEnabled, isSenderPreferEncryptMutual, isReplyToEncrypted, isEncryptAllDrafts, isEncryptSubject, cryptoMode)
 
     private val recipientAutocryptStatusType = recipientAutocryptStatus?.type
     private val isRecipientsPreferEncryptMutual = recipientAutocryptStatus?.type?.isMutual ?: false
@@ -139,6 +141,7 @@ data class ComposeCryptoStatus(private val openPgpProviderState: OpenPgpProvider
             openPgpKeyId = openPgpKeyId,
             isPgpInlineModeEnabled = isPgpInlineModeEnabled,
             isSenderPreferEncryptMutual = isSenderPreferEncryptMutual,
+            isEncryptAllDrafts=  isEncryptAllDrafts,
             isEncryptSubject = isEncryptSubject,
             recipientAutocryptStatus = recipientAutocryptStatusType
     )
