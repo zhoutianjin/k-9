@@ -1335,4 +1335,9 @@ You can keep this message and use it as a backup for your secret key. If you wan
 
     <string name="switch_on">On</string>
     <string name="switch_off">Off</string>
+
+    <string name="account_settings_crypto_encrypt_all_drafts">Store all drafts encrypted</string>
+    <string name="account_settings_crypto_encrypt_all_drafts_on">All drafts will be stored encrypted</string>
+    <string name="account_settings_crypto_encrypt_all_drafts_off">Encrypt drafts only if encryption is enabled</string>
+
 </resources>

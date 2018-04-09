@@ -35,6 +35,7 @@ class AccountSettingsDataStore(
             "remote_search_enabled" -> account.allowRemoteSearch()
             "openpgp_hide_sign_only" -> account.openPgpHideSignOnly
             "openpgp_encrypt_subject" -> account.openPgpEncryptSubject
+            "openpgp_encrypt_all_drafts" -> account.openPgpEncryptAllDrafts
             "autocrypt_prefer_encrypt" -> account.autocryptPreferEncryptMutual
             else -> defValue
         }
@@ -66,6 +67,7 @@ class AccountSettingsDataStore(
             "remote_search_enabled" -> account.setAllowRemoteSearch(value)
             "openpgp_hide_sign_only" -> account.openPgpHideSignOnly = value
             "openpgp_encrypt_subject" -> account.openPgpEncryptSubject = value
+            "openpgp_encrypt_all_drafts" -> account.openPgpEncryptAllDrafts = value
             "autocrypt_prefer_encrypt" -> account.autocryptPreferEncryptMutual = value
             else -> return
         }
