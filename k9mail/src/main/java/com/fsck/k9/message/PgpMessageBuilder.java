@@ -18,6 +18,7 @@ import com.fsck.k9.Globals;
 import com.fsck.k9.R;
 import com.fsck.k9.K9;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus;
+import com.fsck.k9.autocrypt.AutocryptDraftStateHeader;
 import com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor;
 import com.fsck.k9.autocrypt.AutocryptOperations;
 import com.fsck.k9.mail.Address;
@@ -111,6 +112,13 @@ public class PgpMessageBuilder extends MessageBuilder {
             return;
         }
 
+        addAutocryptHeaderIfAvailable(openPgpKeyId);
+        addDraftStateHeader();
+
+        startOrContinueBuildMessage(null);
+    }
+
+    private void addAutocryptHeaderIfAvailable(long openPgpKeyId) {
         Address address = currentProcessedMimeMessage.getFrom()[0];
         byte[] keyData = autocryptOpenPgpApiInteractor.getKeyMaterialForKeyId(
                 openPgpApi, openPgpKeyId, address.getAddress());
@@ -118,8 +126,13 @@ public class PgpMessageBuilder extends MessageBuilder {
             autocryptOperations.addAutocryptHeaderToMessage(currentProcessedMimeMessage, keyData,
                     address.getAddress(), cryptoStatus.isSenderPreferEncryptMutual());
         }
+    }
 
-        startOrContinueBuildMessage(null);
+    private void addDraftStateHeader() {
+        AutocryptDraftStateHeader autocryptDraftStateHeader =
+                AutocryptDraftStateHeader.Companion.fromCryptoStatus(cryptoStatus);
+        currentProcessedMimeMessage.setHeader(AutocryptDraftStateHeader.AUTOCRYPT_DRAFT_STATE_HEADER,
+                autocryptDraftStateHeader.toHeaderValue());
     }
 
     @Override
@@ -156,8 +169,9 @@ public class PgpMessageBuilder extends MessageBuilder {
 
                 boolean payloadSupportsMimeHeaders = !isPgpInlineMode;
                 if (payloadSupportsMimeHeaders) {
+                    moveDraftStateIntoEncryptedPayload();
                     if (cryptoStatus.isEncryptSubject()) {
-                        encryptMessageSubject();
+                        moveSubjectIntoEncryptedPayload();
                     }
                     maybeAddGossipHeadersToBodyPart();
                 }
@@ -196,13 +210,21 @@ public class PgpMessageBuilder extends MessageBuilder {
         return bodyPart;
     }
 
-    private void encryptMessageSubject() {
+    private void moveSubjectIntoEncryptedPayload() {
         String[] subjects = currentProcessedMimeMessage.getHeader(MimeHeader.SUBJECT);
         if (subjects.length > 0) {
             messageContentBodyPart.setHeader(MimeHeader.HEADER_CONTENT_TYPE,
                     messageContentBodyPart.getContentType() + "; protected-headers=\"v1\"");
             messageContentBodyPart.setHeader(MimeHeader.SUBJECT, subjects[0]);
             currentProcessedMimeMessage.setHeader(MimeHeader.SUBJECT, context.getString(R.string.encrypted_subject));
+        }
+    }
+
+    private void moveDraftStateIntoEncryptedPayload() {
+        String[] autocryptDraftState = currentProcessedMimeMessage.getHeader(AutocryptDraftStateHeader.AUTOCRYPT_DRAFT_STATE_HEADER);
+        if (autocryptDraftState.length == 1) {
+            messageContentBodyPart.setHeader(AutocryptDraftStateHeader.AUTOCRYPT_DRAFT_STATE_HEADER, autocryptDraftState[0]);
+            currentProcessedMimeMessage.removeHeader(AutocryptDraftStateHeader.AUTOCRYPT_DRAFT_STATE_HEADER);
         }
     }
 
