@@ -129,9 +129,7 @@ data class ComposeCryptoStatus(private val openPgpProviderState: OpenPgpProvider
 
     fun hasAutocryptPendingIntent() = recipientAutocryptStatus?.hasPendingIntent() == true
 
-    fun hasRecipients(): Boolean {
-        return recipientAddresses.isNotEmpty()
-    }
+    fun hasRecipients() = recipientAddresses.isNotEmpty()
 
     fun withRecipientAutocryptStatus(recipientAutocryptStatusType: RecipientAutocryptStatus) = ComposeCryptoStatus(
             openPgpProviderState = openPgpProviderState,
