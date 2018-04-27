@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -15,8 +14,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import com.fsck.k9.Globals;
-import com.fsck.k9.R;
 import com.fsck.k9.K9;
+import com.fsck.k9.R;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus;
 import com.fsck.k9.autocrypt.AutocryptDraftStateHeader;
 import com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor;
@@ -240,7 +239,7 @@ public class PgpMessageBuilder extends MessageBuilder {
     }
 
     private String[] getCryptoRecipientsWithoutBcc() {
-        ArrayList<String> recipientAddresses = new ArrayList<>(Arrays.asList(cryptoStatus.getRecipientAddresses()));
+        ArrayList<String> recipientAddresses = new ArrayList<>(cryptoStatus.getRecipientAddresses());
         Address[] bccAddresses = currentProcessedMimeMessage.getRecipients(RecipientType.BCC);
         for (Address bccAddress : bccAddresses) {
             recipientAddresses.remove(bccAddress.getAddress());
@@ -272,7 +271,7 @@ public class PgpMessageBuilder extends MessageBuilder {
             pgpApiIntent.putExtra(OpenPgpApi.EXTRA_KEY_IDS, selfEncryptIds);
 
             if(!encryptToSelfOnly) {
-                pgpApiIntent.putExtra(OpenPgpApi.EXTRA_USER_IDS, cryptoStatus.getRecipientAddresses());
+                pgpApiIntent.putExtra(OpenPgpApi.EXTRA_USER_IDS, cryptoStatus.getRecipientAddressesAsArray());
 //                pgpApiIntent.putExtra(OpenPgpApi.EXTRA_ENCRYPT_OPPORTUNISTIC, cryptoStatus.isEncryptionOpportunistic());
             }
         } else {
