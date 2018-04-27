@@ -2430,14 +2430,16 @@ public class MessagingController {
      */
     public void sendMessage(final Account account,
             final Message message,
+            String plaintextSubject,
             MessagingListener listener) {
         try {
             LocalStore localStore = account.getLocalStore();
             LocalFolder localFolder = localStore.getFolder(account.getOutboxFolder());
             localFolder.open(Folder.OPEN_MODE_RW);
             localFolder.appendMessages(Collections.singletonList(message));
-            Message localMessage = localFolder.getMessage(message.getUid());
+            LocalMessage localMessage = localFolder.getMessage(message.getUid());
             localMessage.setFlag(Flag.X_DOWNLOADED_FULL, true);
+            localMessage.setCachedDecryptedSubject(plaintextSubject);
             localFolder.close();
             sendPendingMessages(account, listener);
         } catch (Exception e) {
@@ -3744,8 +3746,8 @@ public class MessagingController {
      *
      * @return Message representing the entry in the local store.
      */
-    public Message saveDraft(final Account account, final Message message, long existingDraftId, boolean saveRemotely) {
-        Message localMessage = null;
+    public Message saveDraft(final Account account, final Message message, long existingDraftId, String plaintextSubject, boolean saveRemotely) {
+        LocalMessage localMessage = null;
         try {
             LocalStore localStore = account.getLocalStore();
             LocalFolder localFolder = localStore.getFolder(account.getDraftsFolder());
@@ -3761,6 +3763,9 @@ public class MessagingController {
             // Fetch the message back from the store.  This is the Message that's returned to the caller.
             localMessage = localFolder.getMessage(message.getUid());
             localMessage.setFlag(Flag.X_DOWNLOADED_FULL, true);
+            if (plaintextSubject != null) {
+                localMessage.setCachedDecryptedSubject(plaintextSubject);
+            }
 
             if (saveRemotely) {
                 PendingCommand command = PendingAppend.create(localFolder.getServerId(), localMessage.getUid());

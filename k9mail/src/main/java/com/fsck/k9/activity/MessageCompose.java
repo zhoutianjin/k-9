@@ -1399,15 +1399,17 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         final Contacts contacts;
         final Message message;
         final Long draftId;
+        final String plaintextSubject;
         final MessageReference messageReference;
 
         SendMessageTask(Context context, Account account, Contacts contacts, Message message,
-                Long draftId, MessageReference messageReference) {
+                Long draftId, String plaintextSubject, MessageReference messageReference) {
             this.context = context;
             this.account = account;
             this.contacts = contacts;
             this.message = message;
             this.draftId = draftId;
+            this.plaintextSubject = plaintextSubject;
             this.messageReference = messageReference;
         }
 
@@ -1422,7 +1424,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 Timber.e(e, "Failed to mark contact as contacted.");
             }
 
-            MessagingController.getInstance(context).sendMessage(account, message, null);
+            MessagingController.getInstance(context).sendMessage(account, message, plaintextSubject, null);
             if (draftId != null) {
                 // TODO set draft id to invalid in MessageCompose!
                 MessagingController.getInstance(context).deleteDraft(account, draftId);
@@ -1514,6 +1516,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
     @Override
     public void onMessageBuildSuccess(MimeMessage message, boolean isDraft) {
+        String plaintextSubject =
+                (currentMessageBuilder instanceof PgpMessageBuilder) ? currentMessageBuilder.getSubject() : null;
+
         if (isDraft) {
             changesMadeSinceLastSave = false;
             currentMessageBuilder = null;
@@ -1523,7 +1528,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             }
 
             new SaveMessageTask(getApplicationContext(), account, contacts, internalMessageHandler,
-                    message, draftId, true).execute();
+                    message, draftId, plaintextSubject, true).execute();
             if (finishAfterDraftSaved) {
                 finish();
             } else {
@@ -1532,7 +1537,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         } else {
             currentMessageBuilder = null;
             new SendMessageTask(getApplicationContext(), account, contacts, message,
-                    draftId != INVALID_DRAFT_ID ? draftId : null, relatedMessageReference).execute();
+                    draftId != INVALID_DRAFT_ID ? draftId : null, plaintextSubject, relatedMessageReference).execute();
             finish();
         }
     }
