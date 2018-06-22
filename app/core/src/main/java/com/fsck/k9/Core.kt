@@ -12,6 +12,8 @@ import com.fsck.k9.activity.MessageCompose
 import com.fsck.k9.autocrypt.autocryptModule
 import com.fsck.k9.backend.backendModule
 import com.fsck.k9.crypto.openPgpModule
+import com.fsck.k9.mail.internet.BinaryTempFileBody
+import com.fsck.k9.mail.ssl.LocalKeyStore
 import com.fsck.k9.mailstore.mailStoreModule
 import com.fsck.k9.message.extractors.extractorModule
 import com.fsck.k9.message.html.htmlModule
@@ -23,6 +25,7 @@ import com.fsck.k9.service.ShutdownReceiver
 import com.fsck.k9.service.StorageGoneReceiver
 import com.fsck.k9.ui.endtoend.endToEndUiModule
 import com.fsck.k9.ui.settings.settingsUiModule
+import com.fsck.k9.widget.list.messageListWidgetModule
 import com.fsck.k9.widget.unread.unreadWidgetModule
 import timber.log.Timber
 import java.util.concurrent.SynchronousQueue
@@ -32,6 +35,7 @@ object Core {
     val coreModules = listOf(
             mainModule,
             settingsUiModule,
+            messageListWidgetModule,
             unreadWidgetModule,
             endToEndUiModule,
             openPgpModule,
@@ -57,6 +61,14 @@ object Core {
         val packageName = context.packageName
         K9RemoteControl.init(packageName)
         K9.Intents.init(packageName)
+    }
+
+    fun init(context: Context) {
+        BinaryTempFileBody.setTempDirectory(context.cacheDir)
+        LocalKeyStore.setKeyStoreLocation(context.getDir("KeyStore", Context.MODE_PRIVATE).toString())
+
+        setServicesEnabled(context)
+        registerReceivers(context)
     }
 
     /**
